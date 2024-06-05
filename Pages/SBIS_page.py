@@ -1,9 +1,30 @@
 from BaseApp import BasePage
 from selenium.webdriver.common.by import By
 
+import re
+
+def transliteration_helper(text):
+    mapping = {
+        "щ": "shh", "ш": "sh", "ч": "ch", "ц": "cz", "ю": "yu", "я": "ya", "ё": "yo", "ж": "zh", "ъ": "`", "ы": "y`", "э": "e`",
+        "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "з": "z", "и": "i", "й": "j", "к": "k", "л": "l", "м": "m",
+        "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ь": "`"
+    }
+
+    text = text.lower().replace(" ", "-")
+    for cyrillic, latin in mapping.items():
+        text = re.sub(cyrillic, latin, text)
+
+    return text.replace("`", "")
+
+
+
+
 class SBISLocators:
     CONTACTS = (By.XPATH, '//*[@id="wasaby-content"]/div/div/div[2]/div[1]/div[1]/div[1]/div[2]/ul/li[2]/a')
     TENSOR_BANNER = (By.XPATH,'//*[@id="contacts_clients"]/div[1]/div/div/div[2]/div/a')
+    REGNAME = (By.XPATH,'//*[@id="container"]/div[1]/div/div[3]/div[2]/div[1]/div/div[2]/span/span')
+    PARTNERS = (By.CSS_SELECTOR,'.sbisru-Contacts-List__item.sbisru-text--standart.sbisru-Contacts__text--500.pv-8.pv-xm-16.pl-24.pr-12.ph-xm-12.mb-xm-8.ws-flexbox.ws-justify-content-between.ws-align-items-start')
+
 
 SBIS_url = "https://sbis.ru/"
 
@@ -17,3 +38,31 @@ class PageUser(BasePage):
 
     def click_on_the_CONTACTS(self):
         return self.click_element(SBISLocators.CONTACTS,time=2)
+
+
+    def check_region(self, region_name = "Ярославская область"):
+        reg_name = self.find_element(SBISLocators.REGNAME,time=2).text
+        print(reg_name,region_name)
+        assert reg_name==region_name, """Регионы не совпадают"""
+
+    def change_region(self, new_region: str = "Ярославская область"):
+        self.click_element(SBISLocators.REGNAME,time=2)
+        locator = (By.XPATH,f"//*[contains(text(), '{new_region}')]")
+        return self.click_element(locator)
+
+
+
+    def check_partners(self):
+        partner_list = self.find_elements(SBISLocators.PARTNERS, time=2)
+        assert len(partner_list)>0,"Список партнеров пуст"
+
+    def check_url(self,reg_name):
+        tranlate_reg_name = transliteration_helper(reg_name)
+        print(tranlate_reg_name,self.driver.current_url)
+        assert tranlate_reg_name in self.driver.current_url
+        pass
+
+    def check_title(self,reg_name):
+        print(reg_name,self.driver.title)
+        assert reg_name in self.driver.title,"Заголовок не совпадает с регионом"
+
