@@ -1,9 +1,12 @@
+import os
+import time
+
 from BaseApp import BasePage
 from selenium.webdriver.common.by import By
 
 import re
 
-def transliteration_helper(text):
+def transliteration_helper(text : str):
     mapping = {
         "щ": "shh", "ш": "sh", "ч": "ch", "ц": "cz", "ю": "yu", "я": "ya", "ё": "yo", "ж": "zh", "ъ": "`", "ы": "y`", "э": "e`",
         "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "з": "z", "и": "i", "й": "j", "к": "k", "л": "l", "м": "m",
@@ -24,6 +27,10 @@ class SBISLocators:
     TENSOR_BANNER = (By.XPATH,'//*[@id="contacts_clients"]/div[1]/div/div/div[2]/div/a')
     REGNAME = (By.XPATH,'//*[@id="container"]/div[1]/div/div[3]/div[2]/div[1]/div/div[2]/span/span')
     PARTNERS = (By.CSS_SELECTOR,'.sbisru-Contacts-List__item.sbisru-text--standart.sbisru-Contacts__text--500.pv-8.pv-xm-16.pl-24.pr-12.ph-xm-12.mb-xm-8.ws-flexbox.ws-justify-content-between.ws-align-items-start')
+    LOCAL_VERSION = (By.XPATH,'//*[@id="container"]/div[2]/div[1]/div[3]/div[3]/ul/li[8]/a')
+    PLAGIN = (By.XPATH,'//div[@data-id="plugin"]')
+    DOWNLOAD = (By.CSS_SELECTOR,'div.ws-SwitchableArea__item.ws-component.ws-enabled.ws-has-focus > div:nth-child(4) > div.sbis_ru-DownloadNew-flex__child.sbis_ru-DownloadNew-flex__child--width-1 > div > a')
+
 
 
 SBIS_url = "https://sbis.ru/"
@@ -65,4 +72,23 @@ class PageUser(BasePage):
     def check_title(self,reg_name):
         print(reg_name,self.driver.title)
         assert reg_name in self.driver.title,"Заголовок не совпадает с регионом"
+
+
+
+
+    def scroll_to_end(self):
+        return self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+    def click_lockal_version(self):
+        return self.click_element(SBISLocators.LOCAL_VERSION,time=2)
+
+    def click_plagin(self):
+        time.sleep(2)
+        return self.click_element(SBISLocators.PLAGIN,time=2)
+
+
+    def download_plagin(self):
+        # self.driver.set_preference("browser.download.dir", os.getcwd())
+        self.Web_download_size = self.find_element(SBISLocators.DOWNLOAD,time=2).text
+        self.click_element(SBISLocators.DOWNLOAD,time=2)
 

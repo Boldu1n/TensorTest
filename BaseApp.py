@@ -8,11 +8,14 @@ class BasePage:
         self.base_url = ""
 
     def click_element(self,locator,time=10):
-        element = WebDriverWait(self.driver, time).until(EC.element_to_be_clickable(locator),
-                                                      message=f"Can't click element by locator {locator}")
+
         try:
+            element = WebDriverWait(self.driver, time).until(EC.element_to_be_clickable(locator),
+                                                             message=f"Can't click element by locator {locator}")
             return element.click()
         except:
+            element = WebDriverWait(self.driver,time).until(EC.presence_of_element_located(locator),
+                                                      message=f"Can't find element by locator {locator}")
             return self.driver.execute_script("arguments[0].click();", element)
     def find_element(self, locator,time=10):
         return WebDriverWait(self.driver,time).until(EC.presence_of_element_located(locator),
